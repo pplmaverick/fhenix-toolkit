@@ -10,16 +10,22 @@ on:
       - 'docs/**'
       - 'agents/**'
       - 'README.md'
+      - '.lycheeignore'
+      - '.github/workflows/link-check.yml'
 
 jobs:
   link-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - uses: actions/checkout@v4
+
       - name: Lychee link check
         uses: lycheeverse/lychee-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: '--no-progress --exclude-mail ./**/*.md'
+          args: '--no-progress --exclude-mail --max-concurrency 4 --timeout 20 --retry-wait-time 2 ./**/*.md'
           fail: true

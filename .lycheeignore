@@ -1,0 +1,15 @@
+# URLs the link-check workflow should skip.
+# Add entries one per line. Lychee supports plain-string and regex (anchored).
+
+# Private repo URLs (this repo is currently private; rate-limited)
+^https://github\.com/FhenixProtocol/fhenix-toolkit/.*$
+
+# npm registry tarball URLs (they 200 but slow + flaky)
+^https://registry\.npmjs\.org/.*\.tgz$
+
+# Localhost / placeholder URLs sometimes used in examples
+^https?://localhost(:[0-9]+)?(/.*)?$
+^https?://127\.0\.0\.1.*$
+
+# Anchor-only links inside doc files (lychee can't resolve in-document anchors here)
+# (none currently)
