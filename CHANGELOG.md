@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Repository scaffolding: README, LICENSE, CHANGELOG, plugin manifest, marketplace manifest, compatibility matrix.
 - `link-check` and `lookup-recipe-smoke` CI workflows.
 - Design spec at `docs/SPEC.md`.
+- `skills/fhenix-sdk/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and six concept files (init-singleton, encrypt-input, decrypt-view-vs-tx, permits, error-handling, hooks-pattern).
 
 ### Changed
 
