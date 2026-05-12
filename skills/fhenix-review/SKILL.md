@@ -1,6 +1,6 @@
 ---
 name: fhenix-review
-description: Use when reviewing or auditing confidential code for Fhenix CoFHE — both on-chain (FHE.sol) and off-chain (@cofhe/sdk). Catches ACL bugs, decrypt-flow mismatches, plaintext leaks, confidentiality-vs-anonymity confusion, and the 25+ recurring gotchas in this catalog. Activates on PR-review flows, "audit this" / "is this safe" prompts, or when reading code that already imports FHE.sol or @cofhe/sdk.
+description: Use when reviewing or auditing confidential code for Fhenix CoFHE — both on-chain (FHE.sol) and off-chain (@cofhe/sdk). Catches ACL bugs, decrypt-flow mismatches, plaintext leaks, confidentiality-vs-anonymity confusion, and the 30+ recurring gotchas in this catalog. Activates on PR-review flows, "audit this" / "is this safe" prompts, or when reading code that already imports FHE.sol or @cofhe/sdk.
 ---
 
 # fhenix-review — audit confidential code
@@ -17,7 +17,7 @@ You activate on review/audit contexts: a PR is open, the user says "audit this" 
 6. **Encrypted approval / allowance** — anywhere code tries to use ERC-20 `approve`/`transferFrom` semantics for ciphertexts.
 7. **Randomness sourcing** — `FHE.randomEuintXX` used where user-contributed entropy is required (auctions, gifts, fair shuffles).
 8. **Input validation** — `InEuintXX` accepted without "Proof of Plaintext Input" where the protocol's invariants depend on the cleartext meeting bounds.
-9. **Permit hygiene** — `expiration` in milliseconds not seconds; stale per-cycle permits; ACPs leaked publicly.
+9. **Permit hygiene** — `expiration` in milliseconds not seconds; stale per-cycle permits; sharing-permit JSONs leaked publicly.
 10. **Standards mixing** — ERC20Confidential + FHERC20 + ERC-7984 interoperating in one app without an explicit wrapper.
 
 Full catalog: `references/gotchas.md`.

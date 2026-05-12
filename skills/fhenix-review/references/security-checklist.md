@@ -10,7 +10,7 @@ A concrete walkthrough to apply before signing off on confidential CoFHE code. T
 - [ ] No `if` / `require` / `while` on `ebool`. All conditional updates use `FHE.select`.
 - [ ] Both arms of every `FHE.select` are the same encrypted type and neither leaks via expensive side effects.
 - [ ] `trivialEncrypt(literal)` is only used for non-secret constants.
-- [ ] `FHE.decrypt` requests are followed by a separate-transaction read via `getDecryptResultSafe` (not assumed synchronous).
+- [ ] No `FHE.decrypt(...)` calls remain (that initiator has been removed from the library); reveals route through the SDK-mediated `decryptForView` / `decryptForTx` flow, with on-chain `FHE.verifyDecryptResult` for tx-bound reveals.
 - [ ] Storage slots that hold decrypted plaintexts are zeroed after use, OR the design accepts the resulting plaintext-on-chain.
 - [ ] No encrypted `approve` semantics; uses operator pattern (`setOperator` / `isOperator`) with explicit expiry.
 - [ ] Randomness for fair shuffles / sealed bids uses user-contributed XOR entropy, not `FHE.randomEuintXX`.

@@ -26,7 +26,7 @@ find node_modules/@cofhe/sdk -name '*.d.ts'
 Or remote:
 
 ```
-WebFetch https://raw.githubusercontent.com/FhenixProtocol/cofhesdk/main/packages/sdk/src/index.ts
+WebFetch https://raw.githubusercontent.com/FhenixProtocol/cofhesdk/master/packages/sdk/core/index.ts
 ```
 
 ## Check the CofheError code catalog
@@ -34,7 +34,7 @@ WebFetch https://raw.githubusercontent.com/FhenixProtocol/cofhesdk/main/packages
 ```
 grep -rn "CofheError" node_modules/@cofhe/sdk/dist/
 # or
-gh api repos/FhenixProtocol/cofhesdk/contents/packages/sdk/src/errors.ts -H "Accept: application/vnd.github.raw"
+gh api repos/FhenixProtocol/cofhesdk/contents/packages/sdk/core/error.ts -H "Accept: application/vnd.github.raw"
 ```
 
 ## Verify ACL behavior in cofhe-contracts internals

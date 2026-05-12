@@ -28,9 +28,11 @@ Every encrypted op whose result is stored to state needs `FHE.allowThis(result)`
 
 `if (FHE.gt(a, b))` / `require(ebool)` / `while (ebool)` — none of these behave like the developer expects. The Solidity comparison is against the ciphertext handle (a `uint256`), not the encrypted value. Use `FHE.select(cond, a, b)`.
 
-### G6. Legacy `FHE.decrypt` / `getDecryptResultSafe` references
+### G6. Legacy `FHE.decrypt(ct)` initiator references
 
-The on-chain async decrypt flow (`FHE.decrypt(ct)` + later `getDecryptResultSafe(ct)`) has been removed from the library. All decryption is now SDK-mediated (`decryptForView` / `decryptForTx` + on-chain `FHE.verifyDecryptResult` for tx-bound reveals). Any contract still calling `FHE.decrypt` is stale code that must be migrated — flag and convert per the `fhenix-contracts` skill's decryption-flow decision tree. See also G14–G15 for the SDK-side pairing rules.
+The on-chain `FHE.decrypt(ct)` initiator has been removed from the library. `getDecryptResultSafe` and `verifyDecryptResult` are still present in `FHE.sol` — they're the building blocks the SDK-mediated flow uses internally and on the verify side. What's gone is the contract-initiated async pattern where a contract called `FHE.decrypt(ct)` and later polled `getDecryptResultSafe(ct)`.
+
+Any contract still calling `FHE.decrypt(ct)` directly is stale code that must be migrated to the SDK-mediated flow (`decryptForView` / `decryptForTx` + on-chain `FHE.verifyDecryptResult`). Flag and convert per the `fhenix-contracts` skill's decryption-flow decision tree. See also G14–G15 for the SDK-side pairing rules.
 
 ### G7. Uninitialized encrypted state acts as zero
 
@@ -66,11 +68,16 @@ Both arms must be the same encrypted type. For `eaddress`, the false arm needs a
 
 ### G14. `decryptForView` always needs a permit
 
-No auto-permit anymore. Calling `decryptForView` without first running `getOrCreateSelfPermit` fails. Always pair them.
+No auto-permit anymore. Calling `decryptForView` without first running `getOrCreateSelfPermit` fails. Always pair them. The real signature is `getOrCreateSelfPermit(publicClient, walletClient, { issuer, name, expiration })` — three positional args; the canonical app form is `(undefined, undefined, { issuer, name, expiration })` to reuse the connected clients. Code calling `getOrCreateSelfPermit({ ... })` with a single options object is wrong (fabricated signature) — flag it.
 
-### G15. `decryptForTx().withoutPermit()` requires on-chain `FHE.allowPublic`
+### G15. `decryptForTx` pairing matrix
 
-The threshold network checks: no permit → must be public. Forgetting `FHE.allowPublic` produces a silent rejection.
+The threshold network enforces the pairing between SDK call and on-chain ACL:
+
+- `decryptForTx(ct).withoutPermit().execute()` requires on-chain `FHE.allowPublic(ct)`. Forgetting `FHE.allowPublic` produces a silent rejection.
+- `decryptForTx(ct).withPermit().execute()` requires on-chain `FHE.allow(ct, user)` AND a valid permit for `user`. If either is missing the call rejects.
+
+Always confirm the on-chain `allow*` AND the off-chain permit form match the SDK call's variant.
 
 ### G16. Permit expiration is Unix SECONDS
 
@@ -88,6 +95,8 @@ Legacy `cofhejs` auto-generated a permit during initialize. `@cofhe/sdk` does NO
 
 Legacy `cofhejs` used a `Result<T>` tuple pattern (`const [err, value] = await ...`). `@cofhe/sdk` throws `CofheError`. Use `try`/`catch`, not destructure.
 
+Real error-code enum members (PascalCase, mapping to `SCREAMING_SNAKE` string values) include: `NotConnected`, `PermitNotFound`, `DecryptFailed`, `DecryptReturnedNull`, `InvalidUtype`, `SealOutputFailed`, `FetchKeysFailed`, `UnsupportedChain`, `ZkVerifyFailed`, `InvalidPermitData`, `AccountUninitialized`, `ChainIdUninitialized`, and more (verify via `references/lookup-recipes.md`). Code that `switch`-es on hand-invented strings like `'KEYS_NOT_INITIALIZED'` / `'PERMIT_REQUIRED'` / `'ACL_DENIED'` / `'NETWORK_ERROR'` is wrong — those codes do not exist in the SDK.
+
 ### G20. `InEuintXX` doesn't match wagmi's inferred ABI types
 
 The struct shape (`ctHash`, `securityZone`, `utype`, `signature`) doesn't fit wagmi's inferred type. Most callsites cast `as any`. Consider a typed wrapper.
@@ -96,9 +105,9 @@ The struct shape (`ctHash`, `securityZone`, `utype`, `signature`) doesn't fit wa
 
 React hooks that depend on "is there a valid permit?" need a bumpable counter so they re-run after `createSelf` / `removePermit`. Missing this causes stale-permit displays.
 
-### G22. ACP JSON is a capability token
+### G22. Sharing-permit JSON is a capability token
 
-An Access Control Permit, once issued, can be used by whoever holds it. Treat the JSON as a one-shot capability — don't post it in chats, don't leave it in URLs.
+The SDK exposes **sharing permits** (real method family: `createSharing` / `importShared` via `PermitUtils`; option types `CreateSharingPermitOptions` / `ImportSharedPermitOptions`). Once issued, a sharing permit can be used by whoever holds the serialized JSON. Treat it as a capability token — don't post it in chats, don't leave it in URLs. Code that refers to a `client.permits.createPermit(...)` method is wrong — that method does not exist; flag and convert to `createSharing` / `importShared`.
 
 ---
 

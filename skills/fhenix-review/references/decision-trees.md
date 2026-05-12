@@ -3,12 +3,14 @@
 ## When to escalate to the deep-audit subagent
 
 ```
-Is the diff small (< 100 LOC of FHE-related code) and the function-by-function flow obvious?
+Is the diff small (< 200 LOC of FHE-related code) and the function-by-function flow obvious?
 ├── Yes  →  Run review inline. Apply the security checklist directly.
 └── No   →  Is this security-sensitive (pre-launch, handling real value, complex composition)?
             ├── Yes  →  Invoke fhe-reviewer subagent for a thorough pass.
             └── No   →  Run inline review; flag explicitly that this wasn't a deep audit.
 ```
+
+Threshold consistent with `SKILL.md` and `agents/fhe-reviewer.md`.
 
 ## Severity ratings
 
