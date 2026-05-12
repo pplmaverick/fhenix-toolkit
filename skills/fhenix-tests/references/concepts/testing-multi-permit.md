@@ -5,52 +5,86 @@
 Some confidential dApps involve multiple parties holding different permits over the same encrypted state. Tests need to exercise the full permission graph — not just "user A can decrypt their own value."
 
 Patterns:
+
 - Two users each have their own encrypted balance; each can only decrypt their own.
-- An ACP (Access Control Permit) lets a verifier decrypt a holder's value.
+- A **sharing permit** lets a holder authorise a specific recipient to decrypt their value.
 - A protocol-public reveal at settle exposes a previously-private value to everyone.
 
 ## Pattern: two users, separate permits
 
 ```
-const [alice, bob] = await ethers.getSigners();
-const aliceSdk = await cofhejs_initializeWithHardhatSigner(alice);
-const bobSdk = await cofhejs_initializeWithHardhatSigner(bob);
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import hre from "hardhat";
+import { Encryptable, FheTypes } from "@cofhe/sdk";
+import { expect } from "chai";
 
-await aliceSdk.permits.getOrCreateSelfPermit({ issuer: alice.address, name: 'myapp' });
-await bobSdk.permits.getOrCreateSelfPermit({ issuer: bob.address, name: 'myapp' });
+async function fixture() {
+  await hre.run("task:cofhe-mocks:deploy");
+  const [alice, bob] = await hre.ethers.getSigners();
 
-// Deposit encrypted into the contract as Alice
-const [encAmount] = await aliceSdk.encryptInputs([Encryptable.uint64(100n)]).execute();
-await contract.connect(alice).deposit(encAmount);
+  const aliceClient = await hre.cofhe.createClientWithBatteries(alice);
+  const bobClient   = await hre.cofhe.createClientWithBatteries(bob);
 
-// Alice can decrypt her balance
-const balCt = await contract.balanceOf(alice.address);
-const { decryptedValue: aliceBal } = await aliceSdk.decryptForView(balCt, FheTypes.Uint64).execute();
-expect(aliceBal).to.equal(100n);
+  // Permits — verify the current signature via lookup-recipes.
+  // Canonical 3-arg form: (publicClient, walletClient, options).
+  await aliceClient.permits.getOrCreateSelfPermit(undefined, undefined, {
+    issuer: alice.address, name: "myapp",
+    expiration: Math.floor(Date.now() / 1000) + 3600,
+  });
+  await bobClient.permits.getOrCreateSelfPermit(undefined, undefined, {
+    issuer: bob.address, name: "myapp",
+    expiration: Math.floor(Date.now() / 1000) + 3600,
+  });
 
-// Bob CANNOT decrypt Alice's balance
-const aliceBalCt = await contract.balanceOf(alice.address);
-await expect(bobSdk.decryptForView(aliceBalCt, FheTypes.Uint64).execute()).to.be.rejected;
-```
+  // ... deploy contract, connect Alice, deposit encrypted balance ...
+  return { alice, bob, aliceClient, bobClient, contract };
+}
 
-## Pattern: ACP (selective disclosure)
+it("each user decrypts only their own balance", async () => {
+  const { alice, aliceClient, bobClient, contract } = await loadFixture(fixture);
 
-```
-// Holder creates an ACP for the verifier
-const acp = await holderSdk.permits.createPermit({
-  issuer: holder.address,
-  recipient: verifier.address,
-  name: 'compliance',
-  expiration: Math.floor(Date.now() / 1000) + 3600,
+  const [encAmount] = await aliceClient
+    .encryptInputs([Encryptable.uint64(100n)])
+    .execute();
+  await contract.connect(alice).deposit(encAmount);
+
+  const aliceBalCt = await contract.balanceOf(alice.address);
+  const { decryptedValue: aliceBal } = await aliceClient
+    .decryptForView(aliceBalCt, FheTypes.Uint64)
+    .execute();
+  expect(aliceBal).to.equal(100n);
+
+  // Bob CANNOT decrypt Alice's balance
+  await expect(
+    bobClient.decryptForView(aliceBalCt, FheTypes.Uint64).execute()
+  ).to.be.rejected;
 });
+```
 
-// Verifier uses it
-verifierSdk.permits.importPermit(acp);   // exact API varies — verify
-const { decryptedValue } = await verifierSdk.decryptForView(holderBalCt, FheTypes.Uint64).execute();
+## Pattern: sharing permit (selective disclosure)
+
+The SDK exposes sharing permits via `PermitUtils.createSharing(...)` and `PermitUtils.importShared(...)` (option types `CreateSharingPermitOptions` / `ImportSharedPermitOptions`). Exact API shape evolves — verify against `references/lookup-recipes.md` before authoring.
+
+```
+import { PermitUtils } from "@cofhe/sdk/permits";
+
+// Holder creates a sharing permit naming the verifier:
+const sharingPermit = await PermitUtils.createSharing(/* ...options matching CreateSharingPermitOptions... */);
+
+// Off-chain: holder ships the serialized permit JSON to the verifier.
+// Verifier imports it into their client:
+await PermitUtils.importShared(/* ...options matching ImportSharedPermitOptions... */);
+
+// Verifier can now decrypt the holder's value:
+const { decryptedValue } = await verifierClient
+  .decryptForView(holderBalCt, FheTypes.Uint64)
+  .execute();
 expect(decryptedValue).to.equal(expectedBalance);
 
 // A third party (eve) cannot
-await expect(eveSdk.decryptForView(holderBalCt, FheTypes.Uint64).execute()).to.be.rejected;
+await expect(
+  eveClient.decryptForView(holderBalCt, FheTypes.Uint64).execute()
+).to.be.rejected;
 ```
 
 ## Pattern: protocol-public reveal at settle
@@ -59,28 +93,31 @@ await expect(eveSdk.decryptForView(holderBalCt, FheTypes.Uint64).execute()).to.b
 // Contract calls FHE.allowPublic(winnerCt) inside requestSettlement
 await contract.requestSettlement();
 
-// Anyone can decrypt without a permit
-const { decryptedValue: winner, signature } = await anySdk
+const winnerCt = await contract.winnerHandle();
+// Any client can decrypt without a permit because the handle is public
+const { decryptedValue: winner, signature } = await eveClient
   .decryptForTx(winnerCt).withoutPermit().execute();
 
-// Pass through the contract's verifier
+// Pass through the contract's verifier (FHE.verifyDecryptResult inside)
 await contract.finalizeSettlement(winner, signature);
 ```
 
 ## Canonical examples
 
-- **Multi-permit / helper migration.**
-  Internal `cofhe/tests/contracts/helper.sol` and corresponding test — exercises multi-permit + ACL grant ordering.
-
 - **Sealed-bid auction E2E.**
-  https://github.com/FhenixProtocol/poc-sealed-bid-auction/blob/main/packages/hardhat/test/ — multi-bidder flow with one settler.
+  https://github.com/FhenixProtocol/poc-sealed-bid-auction/blob/main/packages/hardhat/test/ — multi-bidder flow with a single settler.
 
 - **Secret Santa multi-participant.**
   https://github.com/FhenixProtocol/encrypted-secret-santa/blob/main/packages/hardhat/test/ — each participant has a different encrypted target visible only to them.
 
+- **Selective-disclosure demo.**
+  https://github.com/FhenixProtocol/selective-disclosure-demo — sharing-permit creation + recipient import flow.
+
 ## Gotchas
 
-- **The SDK is stateful per-signer.** Re-init for each user (or use multiple client instances) — don't expect one client to "switch user" cleanly.
-- **Permit `name` collisions cause stale data.** Use distinct `name` strings if two users issue permits in the same test.
-- **ACP import API varies** — check `cofhe-sdk` source for the current shape (`importPermit`, `acceptPermit`, etc.).
-- **Test isolation matters more here** — leftover permits from previous tests can affect outcomes. Reset in `beforeEach`.
+- **Clients are per-signer.** Use `hre.cofhe.createClientWithBatteries(signer)` once per user, then re-use; don't expect a single client to "switch user" cleanly.
+- **`getOrCreateSelfPermit` real signature is 3-arg**: `(publicClient, walletClient, { issuer, name, expiration })`. Single-options-object form (`{ ... }` as the only arg) is wrong.
+- **Permit `name` collisions cause stale data.** Use distinct `name` strings if two users issue permits with semantically different purposes.
+- **`client.permits.createPermit(...)` does NOT exist.** Real method family is `createSelf`, `createSharing`, `importShared` (via `PermitUtils`).
+- **Sharing-permit serialization is a capability token** — treat the JSON like a one-shot capability; do NOT log it in test output or commit it to fixtures.
+- **Test isolation matters.** Leftover permits from previous tests can affect outcomes; reset via fixture (`loadFixture`) or `beforeEach`.

@@ -59,15 +59,23 @@ These cover the gotcha-driven test classes; cross-reference with `fhenix-review/
 
 ## Foundry equivalent
 
-For Foundry mock testing, the threshold network's decrypt is simulated. Use the mock library's helper to "fulfill" a pending decrypt and produce a mock signature:
+For Foundry mock testing (using `cofhe-mock-contracts`'s `CoFheTest`), the decryption flow resolves synchronously within the block. Assert directly via the mock's plaintext-backed storage rather than orchestrating a fulfill:
 
 ```
-contract.requestSettlement();
-mockDecryptFulfill(ctHash, plaintext, signature);   // helper name varies — verify against cofhe-foundry-mocks
-contract.finalizeSettlement(plaintext, signature);
+import { CoFheTest } from "@fhenixprotocol/cofhe-mock-contracts/CoFheTest.sol";
+
+contract MyTest is Test, CoFheTest {
+    function test_settle() public {
+        etchFhenixMocks();
+        // ... deploy, drive contract to a state where ct exists ...
+
+        // The mock's plaintext-backed storage exposes the value:
+        assertHashValue(ct, expectedPlaintext);
+    }
+}
 ```
 
-Verify the exact helper API against the live `cofhe-foundry-mocks` source — see `references/lookup-recipes.md`.
+For the SDK-mediated path (the `decryptForTx` + `finalizeSettlement` round trip), use Pattern B in the Hardhat tests instead — Foundry isn't where you exercise the SDK end-to-end. Look up `assertHashValue`, `mockStorage`, and related helpers in `cofhe-mock-contracts/contracts/CoFheTest.sol` — see `references/lookup-recipes.md`.
 
 ## Gotchas
 

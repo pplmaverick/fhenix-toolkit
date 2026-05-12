@@ -11,7 +11,7 @@ Foundry mocks and the Hardhat plugin's MOCK mode simulate CoFHE but with shortcu
 | `FHE.add(euint32, euint32)` | Stand-in cost | Real network cost (significantly higher) |
 | `FHE.mul(euint64, euint64)` | Modest mock cost | Much more expensive than mock suggests |
 | `FHE.select` | Mock pays both arms cheaply | Both arms truly execute; real cost |
-| `FHE.decrypt + getDecryptResultSafe` | Local op | Threshold network round-trip cost |
+| `FHE.verifyDecryptResult` | Local sig check | Real signature verification cost |
 
 **Implication:** if you tuned gas based on mock numbers, retune on testnet.
 
@@ -19,10 +19,9 @@ Foundry mocks and the Hardhat plugin's MOCK mode simulate CoFHE but with shortcu
 
 | | Mock | Prod |
 |---|---|---|
-| `encryptInputs(...).execute()` | ~ms (first call) then near-instant | Same first-call WASM init; subsequent calls fast |
-| `FHE.decrypt → getDecryptResultSafe` | Same tx ("ready=true" on first poll) | Multiple seconds; multiple polls |
-| `decryptForView(...).execute()` | Fast | Seconds |
-| `decryptForTx(...).execute()` | Fast | Seconds + signature generation |
+| `encryptInputs(...).execute()` | ~1-3s on first call (WASM init) then near-instant | Same first-call WASM init; subsequent calls fast |
+| `decryptForView(...).execute()` | Fast (sync in mocks) | Seconds (real threshold-network round trip) |
+| `decryptForTx(...).execute()` | Fast (sync in mocks) | Seconds + signature generation |
 
 **Implication:** mock-tuned timeouts will be too tight on testnet.
 

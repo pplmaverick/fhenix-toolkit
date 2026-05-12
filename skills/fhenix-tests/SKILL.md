@@ -11,7 +11,7 @@ You activate when the user is writing tests that exercise Fhenix-encrypted code:
 
 | Choice | Use when |
 |---|---|
-| **Foundry mocks** (`cofhe-foundry-mocks`) | Pure-Solidity testing; fast iteration; no Node.js dependency; testing branchless logic, `select`/`allowThis` paths, encrypted state transitions. |
+| **Foundry mocks** (`cofhe-mock-contracts`) | Pure-Solidity testing; fast iteration; no Node.js dependency; testing branchless logic, `select`/`allowThis` paths, encrypted state transitions. |
 | **Hardhat plugin** (`@cofhe/hardhat-plugin`) | End-to-end with the SDK; tests the encrypt→tx→decrypt loop; tests frontend integration; covers the on-chain + off-chain split. |
 
 You can use both in one project — Foundry for unit-level Solidity logic, Hardhat for E2E flows.
@@ -36,20 +36,21 @@ Full rule list: `references/hard-rules.md`.
 
 ## Default Foundry setup
 
-Add the mocks as a Foundry library:
+Install the mocks (note: the old `cofhe-foundry-mocks` repo is archived; the live one is `cofhe-mock-contracts`):
 
 ```
-forge install FhenixProtocol/cofhe-foundry-mocks
+forge install fhenixprotocol/cofhe-mock-contracts
 ```
 
-In `foundry.toml`, point `remappings` at the library. In test files:
+In `foundry.toml`, point `remappings` at the library. Tests inherit `CoFheTest` and call `etchFhenixMocks()` to deploy the mocks at fixed addresses:
 
 ```
-import { CofheMockSetup } from "cofhe-foundry-mocks/CofheMockSetup.sol";
+import { Test } from "forge-std/Test.sol";
+import { CoFheTest } from "@fhenixprotocol/cofhe-mock-contracts/CoFheTest.sol";
 
-contract MyTest is Test {
+contract MyTest is Test, CoFheTest {
     function setUp() public {
-        new CofheMockSetup();   // installs the mock TaskManager / FheOS
+        etchFhenixMocks();   // installs mock TaskManager / ACL / ZkVerifier
         // ... deploy your contracts
     }
 }
@@ -68,10 +69,17 @@ npm install --save-dev @cofhe/hardhat-plugin
 In `hardhat.config.ts`:
 
 ```
-import '@cofhe/hardhat-plugin';
+import "@cofhe/hardhat-plugin";
 ```
 
-The plugin auto-selects `MOCK` mode on the hardhat network and `TESTNET` on arb-sepolia. Tests use the SDK normally; the plugin handles environment-specific keying.
+Inside a test fixture, deploy the mocks then construct an SDK client bound to a signer:
+
+```
+await hre.run("task:cofhe-mocks:deploy");
+const client = await hre.cofhe.createClientWithBatteries(signer);
+```
+
+Tests then use the SDK normally; the plugin handles MOCK-vs-TESTNET keying.
 
 Details: `concepts/hardhat-plugin-setup.md`.
 
@@ -101,11 +109,11 @@ Pattern: `concepts/testing-decrypt-flows.md`.
 
 ## Concepts to read on demand
 
-- `foundry-mocks-setup.md` — installing and using `cofhe-foundry-mocks`.
+- `foundry-mocks-setup.md` — installing and using `cofhe-mock-contracts`.
 - `hardhat-plugin-setup.md` — installing and using `@cofhe/hardhat-plugin`, MOCK vs TESTNET mode.
 - `testing-encrypted-input.md` — building `InEuintXX` test fixtures off-chain.
 - `testing-decrypt-flows.md` — testing SDK `decryptForView` / `decryptForTx` round-trips and on-chain verify.
-- `testing-multi-permit.md` — multiple permits / ACPs / cross-user flows.
+- `testing-multi-permit.md` — multiple permits / sharing permits / cross-user flows.
 - `mock-vs-prod-divergence.md` — what mocks differ on (gas, latency, randomness).
 
 ## Looking up
