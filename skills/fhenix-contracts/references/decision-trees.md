@@ -30,28 +30,24 @@ Common combinations:
 - **Cross-contract transfer (FHERC20 → another):** `allowThis` + `allow(ct, tokenContract)`.
 - **Encrypted gift target:** `allowThis` + `allow(ct, recipient)` (recipient reads via `decryptForView`).
 
-## Decryption flow: which of the three?
+## Decryption flow: which of the two?
 
 ```
-Does the contract itself need to act on the plaintext (transfers, branching)?
-├── Yes  →  ASYNC ON-CHAIN DECRYPT + POLL
-│           FHE.decrypt(ct), then FHE.getDecryptResultSafe(ct) in a later tx
+Does the user need an on-chain follow-up call using the value?
+├── Yes  →  CLIENT DECRYPTS + CONTRACT VERIFIES
+│           Off-chain: decryptForTx(ctHash).withPermit().execute()
+│                      → { decryptedValue, signature }
+│                      OR decryptForTx(...).withoutPermit() if FHE.allowPublic was called
+│           On-chain: FHE.verifyDecryptResult(plaintext, signature) inside the follow-up function
 │
-└── No   →  Does the user need an on-chain follow-up call using the value?
-            ├── Yes  →  CLIENT DECRYPTS + CONTRACT VERIFIES
-            │           Off-chain: decryptForTx(ctHash).withPermit().execute()
-            │                      → { decryptedValue, signature }
-            │                      OR decryptForTx(...).withoutPermit() if FHE.allowPublic was called
-            │           On-chain: FHE.verifyDecryptResult(plaintext, signature) inside the follow-up function
-            │
-            └── No   →  CLIENT-SIDE REVEAL ONLY
-                        Off-chain: decryptForView(ctHash, utype).execute()
-                        On-chain: just FHE.allow(ct, user); never decrypted again on-chain
+└── No   →  CLIENT-SIDE REVEAL ONLY
+            Off-chain: decryptForView(ctHash, utype).execute()
+            On-chain: just FHE.allow(ct, user); never decrypted again on-chain
 ```
 
 Real-world picks:
 
-- **Auction settlement** — async on-chain decrypt (contract triggers transfers based on plaintext winner/amount).
+- **Auction settlement** — client decrypt + on-chain verify: contract calls `FHE.allowPublic`, client calls `decryptForTx(...).withoutPermit()`, settlement tx calls `FHE.verifyDecryptResult`.
 - **Equle claim-victory** — client decrypt + on-chain verify (user proves they won; contract validates the signature).
 - **Secret Santa target reveal** — client-side `decryptForView` only (UI shows the gift target; never on-chain).
 

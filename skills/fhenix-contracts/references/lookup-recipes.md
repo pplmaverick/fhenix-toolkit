@@ -35,14 +35,18 @@ Browse the directory, find the test file that matches your op, then `WebFetch` t
 
 ## Find ACL behavior (allowThis vs allowSender vs allowTransient)
 
-The runtime semantics live in `contracts/internal/`:
+The runtime semantics live under `contracts/internal/host-chain/contracts/`:
 
 ```
-https://raw.githubusercontent.com/FhenixProtocol/cofhe-contracts/main/contracts/internal/Impl.sol
-https://raw.githubusercontent.com/FhenixProtocol/cofhe-contracts/main/contracts/internal/TaskManager.sol
+https://raw.githubusercontent.com/FhenixProtocol/cofhe-contracts/main/contracts/internal/host-chain/contracts/TaskManager.sol
+https://raw.githubusercontent.com/FhenixProtocol/cofhe-contracts/main/contracts/internal/host-chain/contracts/ACL.sol
 ```
 
-These hold the runtime logic that the user-facing `FHE.*` wrappers expose.
+These hold the runtime logic that the user-facing `FHE.*` wrappers expose. If the layout has shifted (it has before), browse the live directory:
+
+```
+gh api repos/FhenixProtocol/cofhe-contracts/contents/contracts/internal
+```
 
 ## Find the version you're targeting
 

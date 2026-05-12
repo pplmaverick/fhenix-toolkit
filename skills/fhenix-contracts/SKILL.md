@@ -9,21 +9,14 @@ You activate when the user is writing or editing Solidity that uses Fhenix's FHE
 
 ## Hard rules — never violate
 
-1. **Never branch on encrypted booleans.** `if (FHE.gt(a, b))` does not work. `ebool` is a ciphertext handle, not a runtime `bool`. Use `FHE.select(cond, ifTrue, ifFalse)` instead. See `references/concepts/branchless-update.md`.
+Tight summary. Full explanations: `references/hard-rules.md`.
 
-2. **Call `FHE.allowThis(x)` after every encrypted op whose result is stored.** Without it, the contract cannot reuse `x` in any future transaction — the network's ACL rejects access. See `references/concepts/allow-cascade.md`.
-
-3. **Prefer `FHE.shr` over encrypted `mul` / `div` for ratios.** Encrypted division is expensive; bit-shifts approximate percentages cheaply. See `references/concepts/bit-shift-ratio.md`.
-
-4. **There is no allowance for ciphertexts.** ERC-20's `approve` / `transferFrom` doesn't translate. Use the operator pattern: `setOperator(operator, until)` + `isOperator(...)`. See `references/concepts/operator-pattern.md`.
-
-5. **`trivialEncrypt` is not private.** The plaintext is visible in calldata. Use it only for constants you don't mind revealing.
-
-6. **Decryption is asynchronous.** `FHE.decrypt(ct)` is a request, not a read. Poll `FHE.getDecryptResultSafe(ct)` in a later transaction. See `references/concepts/async-decrypt.md`.
-
-7. **Confidentiality is not anonymity.** FHE hides values, not the transaction graph. Anyone watching the chain still sees who called what, when, and for how much gas.
-
-Full rule list with explanations: `references/hard-rules.md`.
+1. **No `if` / `require` on `ebool`** → use `FHE.select(cond, a, b)`. (`concepts/branchless-update.md`)
+2. **`FHE.allowThis(x)` after every stored encrypted write** — or the contract can't reuse `x` next tx. (`concepts/allow-cascade.md`)
+3. **Avoid encrypted `mul` / `div` when `shr` works** — bit-shifts approximate ratios cheaply. (`concepts/bit-shift-ratio.md`)
+4. **No ciphertext allowance** — replace ERC-20 `approve` with the operator pattern. (`concepts/operator-pattern.md`)
+5. **`trivialEncrypt` exposes plaintext in calldata** — only safe for non-secret constants.
+6. **Confidentiality is not anonymity** — FHE hides values, not the transaction graph.
 
 ## The four ACL verbs
 
@@ -36,13 +29,12 @@ Full rule list with explanations: `references/hard-rules.md`.
 
 Decision tree: `references/decision-trees.md` (ACL section).
 
-## The three decryption flows
+## The two decryption flows
 
-When the contract needs a value as plaintext, pick one:
+When a value needs to leave the encrypted domain, pick one:
 
-1. **Async on-chain decrypt + poll.** `FHE.decrypt(ct)` → in a later tx, `FHE.getDecryptResultSafe(ct)` → `(plaintext, ready)`. The contract itself acts on the plaintext. Used in auction settlement.
-2. **Client decrypts + contract verifies.** Contract calls `FHE.allowPublic(ct)` or `allow(ct, user)`. Client calls `decryptForTx(ctHash).withoutPermit().execute()` (or `.withPermit()`), gets `{decryptedValue, signature}`, and calls back into the contract which validates with `FHE.verifyDecryptResult(...)`. Used in Equle's "claim victory."
-3. **Client-side reveal only.** Contract calls `FHE.allow(ct, user)`. Client calls `decryptForView(ctHash, utype).execute()` — purely off-chain. Contract never sees the plaintext. Used in Secret Santa's target reveal.
+1. **Client decrypts + contract verifies.** Contract calls `FHE.allowPublic(ct)` or `FHE.allow(ct, user)`. Client calls `decryptForTx(ctHash).withoutPermit().execute()` (or `.withPermit()`), gets `{decryptedValue, signature}`, and calls back into the contract which validates with `FHE.verifyDecryptResult(...)`. Used in auction settlement (allowPublic + withoutPermit) and Equle's claim-victory.
+2. **Client-side reveal only.** Contract calls `FHE.allow(ct, user)`. Client calls `decryptForView(ctHash, utype).execute()` — purely off-chain. Contract never sees the plaintext. Used in Secret Santa's target reveal.
 
 Decision tree: `references/decision-trees.md` (decryption-flow section).
 
@@ -63,7 +55,6 @@ Each `references/concepts/<name>.md` is one focused pattern with links to canoni
 - `branchless-update.md` — `FHE.select` instead of `if` / `require`.
 - `allow-cascade.md` — re-grant access after every derivation; permissions don't inherit.
 - `encrypted-input.md` — `InEuintXX` handling from client to chain.
-- `async-decrypt.md` — submit + poll pattern.
 - `bit-shift-ratio.md` — cheap percentage approximations via `FHE.shr`.
 - `operator-pattern.md` — replacing ERC-20 allowance for ciphertexts.
 - `randomness-via-entropy.md` — user-contributed entropy XOR (no trusted seed).
@@ -81,6 +72,6 @@ For function signatures, op×type availability, exact ACL semantics, or gas beha
 4. **Call `FHE.allowThis(result)`** for anything stored.
 5. Call `FHE.allowSender(result)` if the caller needs to decrypt it off-chain.
 6. Call `FHE.allow(result, addr)` for any downstream contract that needs access.
-7. Pick a reveal path (one of the three flows above) — and **don't reveal what doesn't need to be revealed**.
+7. Pick a reveal path (one of the two flows above) — and **don't reveal what doesn't need to be revealed**.
 
 Verify each step against a concept file before writing. When in doubt, look up.

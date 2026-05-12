@@ -55,11 +55,7 @@ Use the operator pattern instead: `setOperator(operator, until)` + `isOperator(.
 
 `FHE.asEuintXX(<literal>)` calls `trivialEncrypt(literal, ...)` under the hood. The literal travels through calldata in cleartext. Only safe for constants you don't mind revealing (loop bounds, sentinels). For user-supplied secret values, the user must encrypt off-chain and pass an `InEuintXX`.
 
-## Rule 6: Decryption is asynchronous
-
-`FHE.decrypt(ct)` is a request. It does not return the plaintext synchronously. To read the result, call `FHE.getDecryptResultSafe(ct)` (or `getDecryptResult(ct)` which reverts if not ready) in a **later transaction**. Never write code that expects synchronous reads of decrypted values within the same function. See `concepts/async-decrypt.md`.
-
-## Rule 7: Confidentiality is not anonymity
+## Rule 6: Confidentiality is not anonymity
 
 FHE hides values, not the transaction graph. Observers see:
 
@@ -70,14 +66,14 @@ FHE hides values, not the transaction graph. Observers see:
 
 Confidential dApps that need anonymity layer mixers or shielded pools on top of FHE.
 
-## Rule 8: Order of `allow*` calls matters
+## Rule 7: Order of `allow*` calls matters
 
 Call `FHE.allowThis(x)` (and other `allow*` calls) **before** emitting events or returning. The off-chain network observes handles and expects ACL bits to be set by the time it sees them.
 
-## Rule 9: Uninitialized encrypted state acts as zero
+## Rule 8: Uninitialized encrypted state acts as zero
 
 `euint32 x;` in storage starts at the zero handle. Operations on uninitialized state act as if it were `FHE.asEuint32(0)`. Don't rely on "is this set" semantics — track presence with a separate plaintext flag if needed.
 
-## Rule 10: Both branches of `FHE.select` always execute
+## Rule 9: Both branches of `FHE.select` always execute
 
 There's no short-circuit. If one arm is expensive, both costs are paid. For `eaddress`, the false arm must also be an `eaddress` — use `FHE.asEaddress(address(0))` as a sentinel if no meaningful prior value exists.

@@ -36,7 +36,7 @@ If you skip `allowThis` on a stored handle, the contract cannot read or operate 
 
 ## Gotchas
 
-- **Reading state into a local does NOT inherit ACL.** Once you do `euint64 x = encBalances[user];`, operating on `x` and storing the result back still requires fresh `allow*` calls.
+- **Reading state into a local does NOT inherit ACL.** Once you do `euint64 x = encBalances[user];`, operating on `x` and storing the result back still requires fresh `allow*` calls. **Why:** every FHE operation produces a brand-new ciphertext handle (a fresh hash). The new handle has no ACL entries until you set them — permissions don't propagate from the inputs. So `FHE.add(x, y)` creates a third handle that knows nothing about `x`'s or `y`'s permissions; you must call `FHE.allowThis(result)` (and any `allowSender` / `allow`) on it explicitly.
 - **`allowThis` is cheap but not free.** It's a storage write to the TaskManager's ACL mapping. Don't call it on transient handles you won't reuse.
 - **Order matters.** Call all `allow*` calls **before** emitting events or returning. The off-chain network observes handles via events and expects ACL bits set by then.
 - **`allowTransient` exists but is identical to `allow` from Solidity's view** — the transience is enforced by the network, not the contract.
