@@ -35,6 +35,10 @@ This plugin teaches Claude **how to look up current information**, not snapshots
 - Hardhat starter — https://github.com/FhenixProtocol/cofhe-hardhat-starter
 - Foundry mocks — https://github.com/FhenixProtocol/cofhe-foundry-mocks
 
+## CI
+
+Two GitHub Actions workflows — `link-check` and `lookup-recipe-smoke` — run on push, PR, and daily cron. See [`docs/ci.md`](docs/ci.md) for details.
+
 ## License
 
 MIT. See [`LICENSE`](LICENSE).
