@@ -35,6 +35,10 @@ This plugin teaches Claude **how to look up current information**, not snapshots
 - Hardhat starter — https://github.com/FhenixProtocol/cofhe-hardhat-starter
 - Foundry mocks — https://github.com/FhenixProtocol/cofhe-foundry-mocks
 
+## Contributing
+
+PR-review routing is defined in [`.github/CODEOWNERS`](.github/CODEOWNERS) (currently a placeholder pending real handle assignment — see [`docs/codeowners.md`](docs/codeowners.md)).
+
 ## License
 
 MIT. See [`LICENSE`](LICENSE).
