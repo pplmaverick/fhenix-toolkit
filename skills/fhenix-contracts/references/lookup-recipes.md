@@ -35,18 +35,20 @@ Browse the directory (subdirs: `decryptResult`, `onChain`, `publiclyAllowed`, et
 
 ## Find ACL behavior (allowThis vs allowSender vs allowTransient)
 
-The runtime semantics live under `contracts/internal/host-chain/contracts/`:
+The runtime semantics live in `TaskManager.sol` and `ACL.sol`. **Don't hardcode the path — these have moved before.** Find them by name from the live tree:
 
 ```
-https://raw.githubusercontent.com/FhenixProtocol/cofhe-contracts/main/contracts/internal/host-chain/contracts/TaskManager.sol
-https://raw.githubusercontent.com/FhenixProtocol/cofhe-contracts/main/contracts/internal/host-chain/contracts/ACL.sol
+gh api repos/FhenixProtocol/cofhe-contracts/git/trees/main?recursive=1 \
+  | jq -r '.tree[] | select(.path | endswith("TaskManager.sol") or endswith("ACL.sol")) | .path'
 ```
 
-These hold the runtime logic that the user-facing `FHE.*` wrappers expose. If the layout has shifted (it has before), browse the live directory:
+Then `WebFetch` whatever path comes back, against the `main` branch raw URL:
 
 ```
-gh api repos/FhenixProtocol/cofhe-contracts/contents/contracts/internal
+https://raw.githubusercontent.com/FhenixProtocol/cofhe-contracts/main/<path-from-above>
 ```
+
+These hold the runtime logic that the user-facing `FHE.*` wrappers expose.
 
 ## Find the version you're targeting
 
@@ -75,3 +77,12 @@ Use `WebFetch` against the relevant file (`main` branch + named-target grep) whe
 ## When the docs site is sparse
 
 `https://cofhe-docs.fhenix.zone` covers concepts but not exhaustive API reference. For API specifics, prefer the source (`cofhe-contracts/FHE.sol`) over the docs site.
+
+## Deprecated symbols — if you find them, the doc is stale
+
+These appear in older blog posts and docs but are **removed** from current `FHE.sol`. If a recipe surfaces them, treat the source as outdated:
+
+- `FHE.decrypt(ct)` — the legacy synchronous-decrypt initiator. Current flow is off-chain `decryptForTx(...).execute()` + on-chain `FHE.verifyDecryptResult(...)`.
+- `FHE.getDecryptResultSafe(ct)` — the polling pair to the legacy initiator. No longer needed; `decryptForTx().execute()` awaits to completion.
+
+If you see either symbol in a fetched doc or example, switch to the current pattern (`allowPublic` / `allow(ct, user)` on-chain, `decryptForTx` / `decryptForView` off-chain). See `concepts/encrypted-input.md` and the SDK skill (`fhenix-sdk/references/concepts/decrypt-view-vs-tx.md`) for the canonical shape.

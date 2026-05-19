@@ -26,7 +26,7 @@ Final randomness is derived from the combined entropy:
 
 - **XOR-combine, don't sum.** XOR has the property that one honest contributor in a set of dishonest ones still randomizes the result. Addition does not.
 - **Don't reveal contributions individually.** Each participant's `userEntropy` should be `allowThis`'d but not `allowSender`'d or `allowPublic`'d.
-- **The last joiner has an information advantage.** They see the combined entropy before submitting (well — they see the handle, but cannot decrypt it without their own permit). Mitigations: timed phases (commit before any reveal), or accept the imperfection if stakes are low.
+- **The last joiner has a structural advantage, not a cryptographic one.** They see the handle of the combined entropy before submitting — but the handle is `allowThis`-only, so no party (including the last joiner) can decrypt it. The advantage is timing: they pick their contribution after observing that the game is ready to resolve. Mitigations: timed phases (commit before any reveal), or accept the imperfection if stakes are low.
 - **Beware modulo bias** for small ranges. `FHE.rem(entropy, n)` is unbiased only when `2^bits` is divisible by `n`. For tiny `n` (e.g. n=3, n=5) and `euint32` (2^32), the bias is negligible. For very large `n` close to `2^32`, do rejection sampling.
 
 ## Canonical example

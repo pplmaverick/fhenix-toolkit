@@ -1,11 +1,11 @@
 ---
 name: fhenix-contracts
-description: Use when working on Solidity files importing @fhenixprotocol/cofhe-contracts/FHE.sol or using euint*/ebool/eaddress types. Teaches confidential contract patterns — branchless updates with FHE.select, the four ACL verbs, the two decryption flows, and the confidential-token standards picker. Activates on Fhenix CoFHE contract work.
+description: Use when working on Solidity files importing @fhenixprotocol/cofhe-contracts/FHE.sol or fhenix-confidential-contracts, or using euint*/ebool/eaddress types. Teaches confidential contract patterns — branchless updates with FHE.select, the four ACL verbs, the two decryption flows, and the confidential-token standards picker. Activates on Fhenix CoFHE contract work.
 ---
 
 # fhenix-contracts — write confidential Solidity for Fhenix CoFHE
 
-You activate when the user is writing or editing Solidity that uses Fhenix's FHE library: files importing `@fhenixprotocol/cofhe-contracts/FHE.sol`, files using `euint*` / `ebool` / `eaddress` types, or prompts like "build a confidential X contract."
+You activate when the user is writing or editing Solidity that uses Fhenix's FHE library: files importing `@fhenixprotocol/cofhe-contracts/FHE.sol` or `fhenix-confidential-contracts`, files using `euint*` / `ebool` / `eaddress` types, or prompts like "build a confidential X contract."
 
 ## Hard rules — never violate
 
@@ -17,6 +17,9 @@ Tight summary. Full explanations: `references/hard-rules.md`.
 4. **No ciphertext allowance** — replace ERC-20 `approve` with the operator pattern. (`concepts/operator-pattern.md`)
 5. **`trivialEncrypt` exposes plaintext in calldata** — only safe for non-secret constants.
 6. **Confidentiality is not anonymity** — FHE hides values, not the transaction graph.
+7. **Order `allow*` before emit / return** — the off-chain network observes handles in event/return order and expects ACL bits set first.
+8. **Uninitialized encrypted state acts as zero** — `euint32 x;` reads as `FHE.asEuint32(0)`; track presence with a separate plaintext flag.
+9. **Both arms of `FHE.select` always execute** — no short-circuit. For `eaddress`, use `FHE.asEaddress(address(0))` as the false-arm sentinel.
 
 ## The four ACL verbs
 
