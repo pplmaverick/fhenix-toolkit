@@ -1,11 +1,11 @@
 ---
 name: fhenix-review
-description: Use when reviewing or auditing confidential code for Fhenix CoFHE — both on-chain (FHE.sol) and off-chain (@cofhe/sdk). Catches ACL bugs, decrypt-flow mismatches, plaintext leaks, confidentiality-vs-anonymity confusion, and the 30+ recurring gotchas in this catalog. Activates on PR-review flows, "audit this" / "is this safe" prompts, or when reading code that already imports FHE.sol or @cofhe/sdk.
+description: Use when auditing or reviewing confidential code for Fhenix CoFHE — both on-chain (FHE.sol) and off-chain (@cofhe/sdk). Catches ACL bugs, decrypt-flow mismatches, plaintext leaks, confidentiality-vs-anonymity confusion, and the 30+ recurring gotchas in this catalog. Activates only in review/audit contexts — PR diffs, `gh pr view` output, or prompts like "audit this", "review this", "is this safe", "security check", "look over my FHE code".
 ---
 
 # fhenix-review — audit confidential code
 
-You activate on review/audit contexts: a PR is open, the user says "audit this" or "is this safe", or the code under inspection already imports `@fhenixprotocol/cofhe-contracts/FHE.sol` or `@cofhe/sdk`.
+This skill is for review contexts. The companion skills `fhenix-contracts` and `fhenix-sdk` already activate when editing FHE code; this one layers an audit lens on top of (or instead of) them when the task is review rather than authoring.
 
 ## What to look for, in order
 
@@ -42,7 +42,7 @@ Walk the changed code in this order:
 
 For substantive review (PR with >200 LOC of FHE code; security-sensitive merges; pre-launch audits), invoke the **`fhe-reviewer` subagent** (at `agents/fhe-reviewer.md`). It loads the full gotcha catalog and security checklist up front and produces a prioritized report.
 
-Invoke it via the Agent tool with `subagent_type: fhe-reviewer` (when available in the plugin) or just by reading its prompt and applying the same workflow.
+Invoke it via the `Task` tool with `subagent_type: "fhe-reviewer"` (Claude Code's standard subagent invocation — see https://docs.claude.com/en/docs/claude-code/sub-agents). When passing context, include absolute paths to any diff files so the subagent's reads resolve correctly regardless of its working directory.
 
 ## Output shape
 

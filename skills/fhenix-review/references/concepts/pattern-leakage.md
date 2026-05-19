@@ -10,6 +10,8 @@ Different op paths cost different amounts of gas. If branch A involves `FHE.mul 
 
 **Mitigation:** make both arms of every conditional structurally identical at the op level, even if values differ. Pad cheaper arms with no-op encrypted operations.
 
+> **Padding closes the gas channel but isn't free.** Each no-op encrypted op still costs real gas and adds latency to the FHE engine's queue. Budget for it — don't claim "private and cheap" when you've added a mul to every branch.
+
 ### 2. Event-fact leakage
 
 Even with all event arguments encrypted, the *occurrence* of an event is public. If `BidPlaced(encryptedAmount, encryptedBidder)` fires only when the bid exceeds the reserve, the event itself reveals that the bid was high enough.

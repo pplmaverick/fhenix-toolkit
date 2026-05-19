@@ -38,9 +38,18 @@ Any contract still calling `FHE.decrypt(ct)` directly is stale code that must be
 
 `euint32 x;` in storage operates as if it were `FHE.asEuint32(0)`. Don't use "is this set?" semantics on encrypted state; track presence with a plaintext flag.
 
-### G8. `allowGlobal` vs `allowPublic` semantics
+### G8. `allowGlobal` vs `allowPublic` — never recall from memory, always look up
 
-Both exist in the codebase. The exact difference is subtle and version-specific. **Verify against `FHE.sol` source before relying on either.**
+Both names have appeared in the codebase at various points. Their semantic distinction has shifted across versions and you cannot reliably tell them apart from training data. **Always run the lookup recipe before reviewing code that uses either:**
+
+```
+gh api repos/FhenixProtocol/cofhe-contracts/git/trees/main?recursive=1 \
+  | jq -r '.tree[] | select(.path | endswith("FHE.sol")) | .path' \
+  | xargs -I{} curl -s "https://raw.githubusercontent.com/FhenixProtocol/cofhe-contracts/main/{}" \
+  | grep -nE "function (allowGlobal|allowPublic)\b" -A 20
+```
+
+Quote the current signatures and natspec back into the review. If the code under review uses one but the live source only has the other (or has renamed it), that's a finding — the contract is targeting a stale version.
 
 ### G9. Random with seed=0 isn't deterministic
 
