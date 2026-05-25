@@ -44,6 +44,10 @@ Open a GitHub issue. The feedback loop and review cadence are documented in [`do
 
 PR-review routing is defined in [`.github/CODEOWNERS`](.github/CODEOWNERS) (currently a placeholder pending real handle assignment — see [`docs/codeowners.md`](docs/codeowners.md)).
 
+## CI
+
+Two GitHub Actions workflows — `link-check` and `lookup-recipe-smoke` — run on push, PR, and daily cron. See [`docs/ci.md`](docs/ci.md) for details.
+
 ## License
 
 MIT. See [`LICENSE`](LICENSE).
