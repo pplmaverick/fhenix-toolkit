@@ -7,36 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] — 2026-05-25
+
+First public release. The four v1 skills, the audit subagent, the CI, the docs, the brand.
+
 ### Added
 
-- `assets/fhenix-logo.svg` + `assets/fhenix-logo-dark.svg` — official Fhenix logo (light + dark variants). README uses a `<picture>` element with `prefers-color-scheme` so the dark variant renders on GitHub's dark theme.
-- `CLAUDE.md` at repo root — primer Claude reads when the plugin is loaded; documents activation map, layering, and hard rules.
+#### Skills (the core content)
+
+- **`fhenix-contracts`** — write confidential Solidity for Fhenix CoFHE. Hard rules (no `if`/`require` on `ebool` → `FHE.select`, mandatory `allowThis` after every encrypted write, no encrypted `mul`/`div` when `shr` suffices), the four-verb ACL taxonomy, the three decrypt-flow choice, the confidential-token standards picker. Seven concept files (`branchless-update`, `allow-cascade`, `encrypted-input`, `bit-shift-ratio`, `operator-pattern`, `randomness-via-entropy`, `confidential-token-standards`).
+- **`fhenix-sdk`** — integrate `@cofhe/sdk`. Canonical init recipe with SSR-safe Proxy singleton, the three-way decrypt decision (`decryptForView` vs `decryptForTx().withPermit()` vs `decryptForTx().withoutPermit()`), permit lifecycle, encrypted-input ABI cast, the **Unix seconds (not ms)** trap. Six concept files (`init-singleton`, `encrypt-input`, `decrypt-view-vs-tx`, `permits`, `error-handling`, `hooks-pattern`).
+- **`fhenix-review`** — audit confidential code. 30+ gotcha catalog, security checklist, decision trees, four concept files (`confidentiality-vs-anonymity`, `pattern-leakage`, `proof-of-plaintext-input`, `reveal-labels`).
+- **`fhenix-tests`** — test confidential code. Foundry-mocks vs Hardhat-plugin decision, encrypted-input fixtures, decrypt-flow tests, multi-permit, `mock-gas ≠ prod-gas` warning. Six concept files (`foundry-mocks-setup`, `hardhat-plugin-setup`, `testing-encrypted-input`, `testing-decrypt-flows`, `testing-multi-permit`, `mock-vs-prod-divergence`).
+
+#### Companion subagent
+
+- **`fhe-reviewer`** — deep-audit subagent invoked by `fhenix-review` for substantial diffs (>200 LOC of FHE code) or pre-launch audits. Loads the full gotcha catalog into a fresh context, walks function-by-function, returns a prioritized report.
+
+#### Plugin shape
+
+- `.claude-plugin/marketplace.json` — `git-subdir` source pointing at `plugins/fhenix-toolkit`, rich metadata (`keywords`, `category`, author, homepage, repository, license).
+- `plugins/fhenix-toolkit/.claude-plugin/plugin.json` — plugin manifest.
+- `CLAUDE.md` at repo root — primer Claude reads when the plugin is loaded; documents activation map, skill layering, hard rules, lookup-driven philosophy.
+- `compatibility.json` — upstream version window: `@cofhe/sdk ^0.5.0`, `@fhenixprotocol/cofhe-contracts ^0.2.0`.
+
+#### Docs
+
+- `README.md` — marketing-grade with `<picture>`-based light/dark Fhenix logo, three-stat headline, problem→solution table, install instructions in `@FhenixProtocol` form.
+- `docs/SPEC.md` — full plugin design spec.
 - `docs/architecture.md` — runtime model, skill anatomy, lookup-driven philosophy, file map.
 - `docs/known-flaws.md` — honest coverage-gap catalog grouped by skill + infra.
-- `docs/release-process.md` — version bump rules, manual compatibility-bump flow, pre-1.0 caveats.
-- Marketing-grade README with three-stat headline, problem→solution table, status, and `@FhenixProtocol` install form.
-- `marketplace.json` metadata — `keywords`, `category`, full author block, per-plugin `homepage` / `repository` / `license`.
+- `docs/release-process.md` — version bump rules, manual compatibility-bump flow.
+- `docs/ci.md` — link-check + lookup-recipe-smoke workflow documentation.
+- `docs/community-feedback.md` — feedback intake + per-release audit cadence.
+- `assets/fhenix-logo.svg` + `assets/fhenix-logo-dark.svg` — official Fhenix logo (light + dark variants).
 
-### Changed
+#### CI + infra
 
-- **Repo layout:** plugin moved to `plugins/fhenix-toolkit/` subdirectory (cc10x-style monorepo pattern). Marketplace `source` is now `git-subdir` pointing at the new path. Frees up the root for a future second plugin without restructuring.
-- CI workflows (`link-check.yml`, `lookup-recipe-smoke.yml`) — `paths:` filters and the smoke loop updated to match the new subdir layout.
-- Status updated from "early / private" to "public, pre-1.0" across README, SPEC, release-process, and known-flaws — the repo is now public.
+- `.github/workflows/link-check.yml` — daily Lychee link check across all markdown, with `.lycheeignore` allowlist.
+- `.github/workflows/lookup-recipe-smoke.yml` — daily extraction + HEAD-check of every URL referenced from `plugins/*/skills/*/references/lookup-recipes.md`. Catches upstream repo moves before they break user installs.
+- `.github/CODEOWNERS` — routes PRs to `@fhenixprotocol/protocol-team` + `@toml01`.
 
-### Added (original — pre-restructure)
+### Notes
 
-- Repository scaffolding: README, LICENSE, CHANGELOG, plugin manifest, marketplace manifest, compatibility matrix.
-- `link-check` and `lookup-recipe-smoke` CI workflows.
-- Design spec at `docs/SPEC.md`.
-- `skills/fhenix-tests/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and six concept files (foundry-mocks-setup, hardhat-plugin-setup, testing-encrypted-input, testing-decrypt-flows, testing-multi-permit, mock-vs-prod-divergence).
-- `skills/fhenix-review/` — SKILL.md, lookup-recipes, gotcha catalog (30+ items), security checklist, decision-trees, and four concept files (confidentiality-vs-anonymity, pattern-leakage, proof-of-plaintext-input, reveal-labels).
-- `agents/fhe-reviewer.md` — companion deep-audit subagent that loads the full catalog and produces structured prioritized reports.
-- `skills/fhenix-sdk/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and six concept files (init-singleton, encrypt-input, decrypt-view-vs-tx, permits, error-handling, hooks-pattern).
+- **Install:** `/plugin marketplace add FhenixProtocol/fhenix-toolkit` then `/plugin install fhenix-toolkit@FhenixProtocol`.
+- **Repo is public.** Anyone can install.
+- **`fhenix-migrate`** (legacy `cofhejs` → `@cofhe/sdk`) is deferred to v1.5. Spec retained at `docs/SPEC.md` §5.3.
+- **`on-cofhe-release.yml`** (auto-PR on upstream majors) deferred to v1.0; manual bump flow documented in `docs/release-process.md`.
 
-### Changed
-
-- v1 scope reduced from five to four skills; `fhenix-migrate` deferred to v1.5 (spec retained at `docs/SPEC.md` §5.3).
-
-### Added (continued)
-
-- `skills/fhenix-contracts/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and seven concept files (branchless-update, allow-cascade, encrypted-input, bit-shift-ratio, operator-pattern, randomness-via-entropy, confidential-token-standards).
+[0.1.0]: https://github.com/FhenixProtocol/fhenix-toolkit/releases/tag/v0.1.0
