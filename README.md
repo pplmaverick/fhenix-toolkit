@@ -40,6 +40,10 @@ This plugin teaches Claude **how to look up current information**, not snapshots
 
 Open a GitHub issue. The feedback loop and review cadence are documented in [`docs/community-feedback.md`](docs/community-feedback.md).
 
+## Contributing
+
+PR-review routing is defined in [`.github/CODEOWNERS`](.github/CODEOWNERS) (currently a placeholder pending real handle assignment — see [`docs/codeowners.md`](docs/codeowners.md)).
+
 ## License
 
 MIT. See [`LICENSE`](LICENSE).
