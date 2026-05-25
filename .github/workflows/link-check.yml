@@ -27,5 +27,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: '--no-progress --exclude-mail --max-concurrency 4 --timeout 20 --retry-wait-time 2 ./**/*.md'
+          args: '--no-progress --max-concurrency 4 --timeout 20 --retry-wait-time 2 ./**/*.md'
           fail: true
