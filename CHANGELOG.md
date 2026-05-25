@@ -16,3 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - v1 scope reduced from five to four skills; `fhenix-migrate` deferred to v1.5 (spec retained at `docs/SPEC.md` §5.3).
+
+### Added (continued)
+
+- `skills/fhenix-contracts/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and seven concept files (branchless-update, allow-cascade, encrypted-input, bit-shift-ratio, operator-pattern, randomness-via-entropy, confidential-token-standards).
