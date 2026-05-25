@@ -13,7 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `link-check` and `lookup-recipe-smoke` CI workflows.
 - Design spec at `docs/SPEC.md`.
 - `skills/fhenix-tests/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and six concept files (foundry-mocks-setup, hardhat-plugin-setup, testing-encrypted-input, testing-decrypt-flows, testing-multi-permit, mock-vs-prod-divergence).
+- `skills/fhenix-review/` — SKILL.md, lookup-recipes, gotcha catalog (30+ items), security checklist, decision-trees, and four concept files (confidentiality-vs-anonymity, pattern-leakage, proof-of-plaintext-input, reveal-labels).
+- `agents/fhe-reviewer.md` — companion deep-audit subagent that loads the full catalog and produces structured prioritized reports.
 
 ### Changed
 
 - v1 scope reduced from five to four skills; `fhenix-migrate` deferred to v1.5 (spec retained at `docs/SPEC.md` §5.3).
+
+### Added (continued)
+
+- `skills/fhenix-contracts/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and seven concept files (branchless-update, allow-cascade, encrypted-input, bit-shift-ratio, operator-pattern, randomness-via-entropy, confidential-token-standards).

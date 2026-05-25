@@ -4,10 +4,16 @@ on:
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'skills/**/references/lookup-recipes.md'
+      - '.github/workflows/lookup-recipe-smoke.yml'
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -17,10 +23,44 @@ jobs:
       - name: Verify GitHub API access to cofhesdk source tree
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: curl -fsSL -o /dev/null -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/FhenixProtocol/cofhesdk/contents/packages/sdk/src"
+        run: curl -fsSL -o /dev/null -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/FhenixProtocol/cofhesdk/contents/packages/sdk/core"
+
+      - name: Verify raw access to cofhesdk error.ts
+        run: curl -fsSL -o /dev/null https://raw.githubusercontent.com/FhenixProtocol/cofhesdk/master/packages/sdk/core/error.ts
+
+      - name: Verify raw access to cofhe-mock-contracts CoFheTest.sol
+        run: curl -fsSL -o /dev/null https://raw.githubusercontent.com/FhenixProtocol/cofhe-mock-contracts/master/contracts/CoFheTest.sol
 
       - name: Verify docs site reachable
         run: curl -fsSL -o /dev/null https://cofhe-docs.fhenix.zone/
 
-      - name: Placeholder for per-skill recipes
-        run: echo "Per-skill lookup recipes are added as skills land in skills/<name>/references/lookup-recipes.md."
+      - name: Per-skill lookup-recipe URL extraction and verification
+        shell: bash
+        run: |
+          set -u
+          declare -A SEEN
+          FAIL=0
+          for f in skills/*/references/lookup-recipes.md; do
+            [ -f "$f" ] || continue
+            echo "::group::Checking $f"
+            while IFS= read -r url; do
+              [ -z "$url" ] && continue
+              if [[ -n "${SEEN[$url]:-}" ]]; then
+                continue
+              fi
+              SEEN[$url]=1
+              if curl -fsSL -o /dev/null --max-time 20 "$url"; then
+                echo "ok: $url"
+              else
+                echo "FAIL: $url"
+                FAIL=1
+              fi
+            done < <(grep -oE 'https?://[A-Za-z0-9._/~:?&=#%+-]+' "$f" \
+              | grep -E 'raw\.githubusercontent\.com|api\.github\.com|cofhe-docs\.fhenix\.zone|github\.com|fhenix\.io|npmjs\.com|fhenix\.mintlify\.app' \
+              | sort -u)
+            echo "::endgroup::"
+          done
+          if [ "$FAIL" -ne 0 ]; then
+            echo "One or more lookup-recipe URLs failed; review the failures above."
+            exit 1
+          fi

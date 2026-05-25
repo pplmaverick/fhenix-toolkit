@@ -57,8 +57,8 @@ Each skill activates on its own triggers (file imports, file extensions, or user
 ### 5.1 `fhenix-contracts`
 
 - **Activates on:** files importing `@fhenixprotocol/cofhe-contracts/FHE.sol`; presence of `euint*`, `ebool`, or `eaddress` types; user prompts like "build a confidential X contract."
-- **Teaches:** hard rules (no `if` / `require` on `ebool` → `FHE.select`; `allowThis` after every encrypted write; no encrypted `mul` / `div` if `shr` works); the four-verb ACL taxonomy (`allowThis` / `allowSender` / `allow(ct, addr)` / `allowPublic`); the three decrypt-flow choice; standards picker (`ERC20Confidential` vs FHERC20 vs ERC7984).
-- **Concepts shipped:** `branchless-update`, `allow-cascade`, `encrypted-input`, `async-decrypt`, `select-vs-if`, `select-eaddress-sentinel`, `confidential-token-standards`, `bit-shift-ratio`, `operator-pattern-for-ciphertext-allowance`, `randomness-via-user-entropy`.
+- **Teaches:** hard rules (no `if` / `require` on `ebool` → `FHE.select`; `allowThis` after every encrypted write; no encrypted `mul` / `div` if `shr` works); the four-verb ACL taxonomy (`allowThis` / `allowSender` / `allow(ct, addr)` / `allowPublic`); the two decrypt-flow choice (client-decrypt + on-chain verify; client-side view-only); standards picker (`ERC20Confidential` vs FHERC20 vs ERC7984).
+- **Concepts shipped:** `branchless-update`, `allow-cascade`, `encrypted-input`, `bit-shift-ratio`, `operator-pattern`, `randomness-via-entropy`, `confidential-token-standards`.
 
 ### 5.2 `fhenix-sdk`
 
@@ -77,7 +77,7 @@ This skill is designed but not in v1 scope. Spec retained so the eventual implem
 ### 5.4 `fhenix-review`
 
 - **Activates on:** PR-review flows; user prompts like "audit this", "is this safe", "review my FHE code"; files matching either the contracts or SDK triggers *during* a review context.
-- **Teaches:** the gotcha catalog (15+ items including uninitialized-CT-defaults-to-zero; `allowTransient` is Solidity-identical to `allow`; downcast doesn't truncate ciphertext; `trivialEncrypt` makes the plaintext visible in calldata; `withoutPermit` silent-fail; gas-pattern leakage; event-emit leakage; confidentiality ≠ anonymity; encrypted-`approve` not at parity); security checklist for confidential contracts; "Proof of Plaintext Input" pattern for validating `InEuintXX` arrivals.
+- **Teaches:** the gotcha catalog (15+ items including uninitialized-CT-defaults-to-zero; `allowTransient` is Solidity-identical to `allow`; downcast silently truncates by modular reduction (no saturation, no overflow check); `trivialEncrypt` makes the plaintext visible in calldata; `withoutPermit` silent-fail; gas-pattern leakage; event-emit leakage; confidentiality ≠ anonymity; encrypted-`approve` not at parity); security checklist for confidential contracts; "Proof of Plaintext Input" pattern for validating `InEuintXX` arrivals.
 - **Companion subagent:** `agents/fhe-reviewer.md`, invoked for deeper review passes. The subagent loads the full gotcha catalog up front; the main skill stays lean.
 
 ### 5.5 `fhenix-tests`
@@ -98,6 +98,7 @@ Concept files reference **public example repos by URL**. When Claude needs a con
 
 - `FhenixProtocol/cofhe-contracts`
 - `FhenixProtocol/cofhesdk`
+- `FhenixProtocol/fhenix-confidential-contracts` (npm: `fhenix-confidential-contracts`)
 - `FhenixProtocol/poc-shielded-stablecoin`
 - `FhenixProtocol/poc-sealed-bid-auction`
 - `FhenixProtocol/rfq-demo`
@@ -107,6 +108,11 @@ Concept files reference **public example repos by URL**. When Claude needs a con
 - `FhenixProtocol/cofhe-hardhat-starter`
 - `FhenixProtocol/cofhe-mock-contracts` (formerly `cofhe-foundry-mocks`, archived; current home for Foundry/Hardhat mocks — npm: `@fhenixprotocol/cofhe-mock-contracts`)
 - `marronjo/fhe-hooks` (vetted community Uniswap v4 hooks example)
+
+The following non-repo canonical sources are also allowed:
+
+- `https://cofhe-docs.fhenix.zone` (official docs site)
+- `https://www.fhenix.io/blog` (official Fhenix blog — notably the *Decryption in CoFHE, Evolved* and *CoFHE Architecture* posts)
 
 Adding more requires a PR that updates this spec.
 
