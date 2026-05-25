@@ -33,7 +33,20 @@ This plugin teaches Claude **how to look up current information**, not snapshots
 - `@fhenixprotocol/cofhe-contracts` — https://github.com/FhenixProtocol/cofhe-contracts
 - `@cofhe/sdk` — https://github.com/FhenixProtocol/cofhesdk
 - Hardhat starter — https://github.com/FhenixProtocol/cofhe-hardhat-starter
-- Foundry mocks — https://github.com/FhenixProtocol/cofhe-foundry-mocks
+- Foundry mocks (current) — https://github.com/FhenixProtocol/cofhe-mock-contracts
+- Foundry mocks (archived) — https://github.com/FhenixProtocol/cofhe-foundry-mocks
+
+## Reporting issues / community feedback
+
+Open a GitHub issue. The feedback loop and review cadence are documented in [`docs/community-feedback.md`](docs/community-feedback.md).
+
+## Contributing
+
+PR-review routing is defined in [`.github/CODEOWNERS`](.github/CODEOWNERS) (currently a placeholder pending real handle assignment — see [`docs/codeowners.md`](docs/codeowners.md)).
+
+## CI
+
+Two GitHub Actions workflows — `link-check` and `lookup-recipe-smoke` — run on push, PR, and daily cron. See [`docs/ci.md`](docs/ci.md) for details.
 
 ## License
 
