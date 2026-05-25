@@ -1,31 +1,75 @@
-# fhenix-toolkit
+<p align="center">
+  <img src="assets/fhenix-logo.svg" alt="Fhenix" width="260" />
+</p>
 
-Claude Code plugin for building confidential smart contracts and dApps on **Fhenix CoFHE** — the FHE coprocessor — using `FHE.sol` and `@cofhe/sdk`.
+<h1 align="center">fhenix-toolkit</h1>
 
-Four skills shipping in v1 (one more planned):
+<p align="center">
+  <em>Claude Code's confidential-DeFi toolkit. Write, test, and audit CoFHE code without the footguns.</em>
+</p>
 
-| Skill | Purpose | Activates on |
-|---|---|---|
-| `fhenix-contracts` | Write confidential Solidity contracts | Files importing `FHE.sol` or using `euint*` / `ebool` |
-| `fhenix-sdk` | Integrate `@cofhe/sdk` (encrypt, decrypt, permits) | Files importing `@cofhe/sdk` |
-| `fhenix-review` | Audit confidential code for ACL bugs, decrypt-flow mismatches, plaintext leaks | PR-review flows; explicit "audit this" prompts |
-| `fhenix-tests` | Write tests for confidential contracts (Foundry mocks, Hardhat plugin) | Test files importing FHE.sol or `@cofhe/sdk` |
-| `fhenix-migrate` *(v1.5)* | Migrate from legacy `cofhejs` to `@cofhe/sdk` | Files importing `cofhejs` |
+<p align="center">
+  <strong>4 skills</strong> &nbsp;·&nbsp; <strong>1 audit subagent</strong> &nbsp;·&nbsp; <strong>30+ gotcha catalog</strong> &nbsp;·&nbsp; <strong>lookup-driven (stays current)</strong>
+</p>
 
-## Install (Claude Code)
+---
+
+## Install
 
 ```
 /plugin marketplace add FhenixProtocol/fhenix-toolkit
-/plugin install fhenix-toolkit
+/plugin install fhenix-toolkit@FhenixProtocol
 ```
 
-## Status
+Then ask Claude *"help me write a confidential ERC20"* or *"audit this FHE.sol contract"* — the right skill activates on its own.
 
-Early / private. Public release pending — see [`docs/SPEC.md`](docs/SPEC.md) for the roadmap.
+> **Heads up:** the repo is currently private. You'll need read access to the FhenixProtocol GitHub org for `/plugin marketplace add` to succeed.
+
+---
+
+## Why fhenix-toolkit
+
+Writing confidential smart contracts is full of subtle traps that look fine in plaintext-land but silently break under FHE. ACL slips. Decrypt flow mismatches. Type-tag misreads. Plaintext leaking through events or gas. A model with general Solidity knowledge will produce code that *compiles* and *passes mock tests* — and is unsafe in production.
+
+This plugin closes that gap.
+
+| The pain you know | How fhenix-toolkit handles it |
+|---|---|
+| Claude writes `if (FHE.gt(a, b))` and your tests pass against the mock | `fhenix-contracts` activates on the import, refuses `if/require` on `ebool`, routes to `FHE.select` |
+| Stored encrypted state but forgot `FHE.allowThis` — next transaction reverts | Hard-rules check fires before you submit. `fhenix-review` flags it as **Critical (G1)** on PR review |
+| `decryptForTx().withoutPermit()` silently 0s out because the contract didn't call `FHE.allowPublic` | `fhenix-review` flags it as **Critical (G15)** with the matching on-chain fix |
+| Narrowing cast `asEuint8(euint64Val)` decrypts to a value you didn't expect | Gotcha **G3** explains the modular-reduction semantics and the saturation patterns |
+| Test passes on mocks, fails in prod because gas profile differs | `fhenix-tests` carries the **mock-gas ≠ prod-gas** warning and the mocks-vs-plugin decision tree |
+| Skill says X but the SDK shipped Y last week | Plugin is **lookup-driven**: no snapshots, every code reference is a recipe that pulls live from the public Fhenix repos |
+
+Each skill activates on the right context (file imports, file extensions, prompt cues) so you don't pay context cost for skills you aren't using.
+
+---
+
+## What ships
+
+| Skill | Activates on | Purpose |
+|---|---|---|
+| `fhenix-contracts` | Solidity files importing `@fhenixprotocol/cofhe-contracts/FHE.sol`, or files using `euint*` / `ebool` / `eaddress` | Hard rules (`FHE.select`, ACL cascade, no encrypted `mul`/`div`), the four-verb ACL taxonomy, three decrypt-flow choices, confidential-token standards picker |
+| `fhenix-sdk` *(PR open)* | Files importing `@cofhe/sdk` or its subpaths | Canonical init recipe, decrypt-flow decision tree (`decryptForView` vs `decryptForTx`), permit lifecycle, encrypted-input ABI cast |
+| `fhenix-review` | PR-review prompts, `gh pr view` output, "audit this" / "is this safe" requests | 30+ gotcha catalog, security checklist, ACL/decrypt-flow audit lens, confidentiality-vs-anonymity guardrails |
+| `fhenix-tests` | `.test.ts` / `.t.sol` importing FHE.sol or `@cofhe/sdk` | Foundry-mocks vs Hardhat-plugin decision, encrypted-input fixtures, decrypt-flow tests, multi-permit, mock-vs-prod divergence |
+
+Plus the **`fhe-reviewer` subagent** — deep-audit companion to `fhenix-review`. Invoked for substantial diffs (>200 LOC of FHE code) or pre-launch audits. Loads the full catalog into a fresh context, walks function-by-function, returns a prioritized report.
+
+`fhenix-migrate` (legacy `cofhejs` → `@cofhe/sdk`) is deferred to v1.5 — design intact, ship timing TBD.
+
+---
 
 ## Design philosophy
 
-This plugin teaches Claude **how to look up current information**, not snapshots of it. Concepts, decision trees, and gotchas are curated. API surfaces (FHE.sol functions, SDK methods, error codes) are looked up live from the public Fhenix repos at the moment of need. That way the plugin stays correct as the underlying SDK and contracts evolve, without constant snapshot maintenance.
+**Curated wisdom, looked-up specifics.** The skills carry concepts, decision trees, and gotchas — the things that don't change between releases. API surfaces (FHE.sol functions, SDK method signatures, error codes, deployed addresses) are looked up live from the public Fhenix repos at the moment of need.
+
+That way the plugin stays correct as the SDK and contracts evolve, without constant snapshot maintenance. Drift gets caught by CI (`lookup-recipe-smoke.yml`) and surfaces as a failed build, not as silently-wrong Claude output.
+
+See [`docs/SPEC.md`](docs/SPEC.md) and [`docs/architecture.md`](docs/architecture.md) for the full design.
+
+---
 
 ## Resources
 
@@ -36,13 +80,19 @@ This plugin teaches Claude **how to look up current information**, not snapshots
 - Foundry mocks (current) — https://github.com/FhenixProtocol/cofhe-mock-contracts
 - Foundry mocks (archived) — https://github.com/FhenixProtocol/cofhe-foundry-mocks
 
+---
+
+## Status
+
+**Early — private repo.** Public release is gated on merging the `fhenix-sdk` skill (PR #2) and tagging v1.0. See [`docs/SPEC.md`](docs/SPEC.md) §10 for the release plan and [`docs/known-flaws.md`](docs/known-flaws.md) for current gaps in coverage.
+
 ## Reporting issues / community feedback
 
 Open a GitHub issue. The feedback loop and review cadence are documented in [`docs/community-feedback.md`](docs/community-feedback.md).
 
 ## Contributing
 
-PR-review routing is defined in [`.github/CODEOWNERS`](.github/CODEOWNERS) (currently a placeholder pending real handle assignment — see [`docs/codeowners.md`](docs/codeowners.md)).
+PR-review routing is in [`.github/CODEOWNERS`](.github/CODEOWNERS). The release process is in [`docs/release-process.md`](docs/release-process.md).
 
 ## CI
 
