@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'skills/**/references/lookup-recipes.md'
+      - 'plugins/**/references/lookup-recipes.md'
       - '.github/workflows/lookup-recipe-smoke.yml'
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
           set -u
           declare -A SEEN
           FAIL=0
-          for f in skills/*/references/lookup-recipes.md; do
+          for f in plugins/*/skills/*/references/lookup-recipes.md; do
             [ -f "$f" ] || continue
             echo "::group::Checking $f"
             while IFS= read -r url; do

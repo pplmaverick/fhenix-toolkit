@@ -5,15 +5,44 @@
     "name": "Fhenix Protocol",
     "url": "https://www.fhenix.io"
   },
+  "metadata": {
+    "description": "Skills for building, testing, and auditing confidential smart contracts and dApps on Fhenix CoFHE — FHE.sol, @cofhe/sdk, mocks, and a 30+ gotcha catalog.",
+    "version": "0.1.0",
+    "homepage": "https://cofhe-docs.fhenix.zone",
+    "repository": "https://github.com/FhenixProtocol/fhenix-toolkit"
+  },
   "plugins": [
     {
       "name": "fhenix-toolkit",
       "source": {
-        "source": "github",
-        "repo": "FhenixProtocol/fhenix-toolkit"
+        "source": "git-subdir",
+        "url": "FhenixProtocol/fhenix-toolkit",
+        "path": "plugins/fhenix-toolkit"
       },
-      "description": "Skills for building confidential smart contracts and dApps with Fhenix CoFHE.",
-      "version": "0.1.0"
+      "description": "Write, test, and audit confidential Solidity and TypeScript on Fhenix CoFHE. Ships fhenix-contracts, fhenix-sdk (pending), fhenix-review, fhenix-tests skills plus the fhe-reviewer audit subagent.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Fhenix Protocol",
+        "url": "https://www.fhenix.io"
+      },
+      "homepage": "https://cofhe-docs.fhenix.zone",
+      "repository": "https://github.com/FhenixProtocol/fhenix-toolkit",
+      "license": "MIT",
+      "category": "development-tools",
+      "keywords": [
+        "fhenix",
+        "cofhe",
+        "fhe",
+        "confidential-contracts",
+        "solidity",
+        "ethereum",
+        "homomorphic-encryption",
+        "smart-contracts",
+        "privacy",
+        "security-review",
+        "audit",
+        "testing"
+      ]
     }
   ]
 }

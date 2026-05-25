@@ -9,7 +9,7 @@ Runs Lychee against every markdown file. Catches dead links to public Fhenix rep
 **Triggers:**
 - Daily cron at 02:00 UTC
 - Manual dispatch (`workflow_dispatch`)
-- Pull requests touching `skills/**`, `docs/**`, `agents/**`, `README.md`, `.lycheeignore`, or the workflow file itself
+- Pull requests touching `plugins/**`, `docs/**`, `README.md`, `CLAUDE.md`, `.lycheeignore`, or the workflow file itself
 
 **Tuning:**
 - Concurrency capped at 4 to avoid hitting GitHub's rate limit
@@ -22,7 +22,7 @@ Runs Lychee against every markdown file. Catches dead links to public Fhenix rep
 
 ## `lookup-recipe-smoke.yml`
 
-Verifies that every URL referenced from `skills/*/references/lookup-recipes.md` still resolves. The intent is "if Claude follows a recipe, the recipe's URLs actually work today."
+Verifies that every URL referenced from `plugins/*/skills/*/references/lookup-recipes.md` still resolves. The intent is "if Claude follows a recipe, the recipe's URLs actually work today."
 
 **Triggers:**
 - Daily cron at 03:00 UTC

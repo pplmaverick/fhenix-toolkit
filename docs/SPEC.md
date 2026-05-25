@@ -126,7 +126,7 @@ Adding more requires a PR that updates this spec.
 Each skill's `references/` directory:
 
 ```
-skills/<skill>/
+plugins/fhenix-toolkit/skills/<skill>/
 ├── SKILL.md                       # lean prompt loaded on activation
 └── references/
     ├── lookup-recipes.md          # where and how to fetch live API info
