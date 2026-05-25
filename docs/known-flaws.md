@@ -14,8 +14,8 @@ The goal of this file is to be honest about the gaps so users can compensate and
 
 ### `fhenix-sdk`
 
-- **Skill is not shipped.** PR #2 is open, not yet merged. Until merge, SDK-side code authoring falls back to general TypeScript reasoning plus the lookup recipes.
-- **No coverage of server-side / Node-only flows.** The skill (in PR) emphasizes browser/SSR. Pure-backend integrations (relayer services, indexers) get a thinner treatment.
+- **No coverage of server-side / Node-only flows.** The skill emphasizes browser/SSR. Pure-backend integrations (relayer services, indexers) get a thinner treatment.
+- **Permit-lifecycle edge cases under aggressive caching.** The canonical permit flow assumes one app, one user, modest cache. Multi-tenant SDK setups (e.g., wallet aggregators) have permit-rotation patterns the skill doesn't yet cover.
 
 ### `fhenix-review`
 

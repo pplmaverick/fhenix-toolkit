@@ -51,7 +51,7 @@ Each skill activates on the right context (file imports, file extensions, prompt
 | Skill | Activates on | Purpose |
 |---|---|---|
 | `fhenix-contracts` | Solidity files importing `@fhenixprotocol/cofhe-contracts/FHE.sol`, or files using `euint*` / `ebool` / `eaddress` | Hard rules (`FHE.select`, ACL cascade, no encrypted `mul`/`div`), the four-verb ACL taxonomy, three decrypt-flow choices, confidential-token standards picker |
-| `fhenix-sdk` *(PR open)* | Files importing `@cofhe/sdk` or its subpaths | Canonical init recipe, decrypt-flow decision tree (`decryptForView` vs `decryptForTx`), permit lifecycle, encrypted-input ABI cast |
+| `fhenix-sdk` | Files importing `@cofhe/sdk` or its subpaths; hooks like `useCofhe*` | Canonical init recipe, decrypt-flow decision tree (`decryptForView` vs `decryptForTx`), permit lifecycle, encrypted-input ABI cast |
 | `fhenix-review` | PR-review prompts, `gh pr view` output, "audit this" / "is this safe" requests | 30+ gotcha catalog, security checklist, ACL/decrypt-flow audit lens, confidentiality-vs-anonymity guardrails |
 | `fhenix-tests` | `.test.ts` / `.t.sol` importing FHE.sol or `@cofhe/sdk` | Foundry-mocks vs Hardhat-plugin decision, encrypted-input fixtures, decrypt-flow tests, multi-permit, mock-vs-prod divergence |
 
@@ -84,7 +84,7 @@ See [`docs/SPEC.md`](docs/SPEC.md) and [`docs/architecture.md`](docs/architectur
 
 ## Status
 
-**Early — private repo.** Public release is gated on merging the `fhenix-sdk` skill (PR #2) and tagging v1.0. See [`docs/SPEC.md`](docs/SPEC.md) §10 for the release plan and [`docs/known-flaws.md`](docs/known-flaws.md) for current gaps in coverage.
+**Early — private repo.** All four v1 skills are merged; remaining v1.0 milestones are flipping the repo public and tagging the first release. See [`docs/SPEC.md`](docs/SPEC.md) §10 for the release plan and [`docs/known-flaws.md`](docs/known-flaws.md) for current gaps in coverage.
 
 ## Reporting issues / community feedback
 
