@@ -1,7 +1,7 @@
 # fhenix-toolkit — Design Spec
 
 **Date:** 2026-05-12
-**Status:** Draft v1 (private repo until public release)
+**Status:** Draft v1 (public, pre-1.0)
 **Owner:** TBD (CODEOWNERS pending)
 **Repo:** https://github.com/FhenixProtocol/fhenix-toolkit
 
@@ -171,7 +171,7 @@ Patch and minor CoFHE releases don't trigger this — the curated content should
 ## 10. Release & versioning
 
 - Plugin uses its own semver, decoupled from CoFHE versions.
-- v0.x ships during private development.
+- v0.x ships during pre-1.0 stabilization.
 - v1.0 marks public release.
 - Minor bumps: new concepts, new skills.
 - Major bumps: skill renames, activation-trigger changes, removed concepts.

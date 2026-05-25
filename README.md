@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="assets/fhenix-logo.svg" alt="Fhenix" width="260" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/fhenix-logo-dark.svg">
+    <img src="assets/fhenix-logo.svg" alt="Fhenix" width="260">
+  </picture>
 </p>
 
 <h1 align="center">fhenix-toolkit</h1>
@@ -22,8 +25,6 @@
 ```
 
 Then ask Claude *"help me write a confidential ERC20"* or *"audit this FHE.sol contract"* — the right skill activates on its own.
-
-> **Heads up:** the repo is currently private. You'll need read access to the FhenixProtocol GitHub org for `/plugin marketplace add` to succeed.
 
 ---
 
@@ -84,7 +85,7 @@ See [`docs/SPEC.md`](docs/SPEC.md) and [`docs/architecture.md`](docs/architectur
 
 ## Status
 
-**Early — private repo.** All four v1 skills are merged; remaining v1.0 milestones are flipping the repo public and tagging the first release. See [`docs/SPEC.md`](docs/SPEC.md) §10 for the release plan and [`docs/known-flaws.md`](docs/known-flaws.md) for current gaps in coverage.
+**Public, pre-1.0.** All four v1 skills are merged. The remaining v1.0 milestone is tagging the first release. See [`docs/SPEC.md`](docs/SPEC.md) §10 for the release plan and [`docs/known-flaws.md`](docs/known-flaws.md) for current gaps in coverage.
 
 ## Reporting issues / community feedback
 
