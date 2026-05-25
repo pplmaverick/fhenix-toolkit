@@ -1,41 +1,5 @@
-# CODEOWNERS — fhenix-toolkit
-#
-# This file routes PR-review requests to the right reviewers per affected area.
-# GitHub honours the LAST matching rule for a given path.
-#
-# Placeholder entries below — real handles will be filled in once owners are named.
-# Tracking: https://github.com/FhenixProtocol/fhenix-toolkit/issues/8
-#
-# Notation:
-#   @<placeholder>           — TODO: fill with real GitHub handles
-#   @FhenixProtocol/<team>   — team mentions; create the team in the org first
-
-# Repo-wide default — covers anything not matched by a more-specific rule below.
-*                                     # @FhenixProtocol/devrel
-
-# Solidity-side skill guidance — depends on FHE.sol surface.
-/skills/fhenix-contracts/             # @FhenixProtocol/contracts-team
-
-# SDK / TypeScript skill guidance — depends on @cofhe/sdk surface.
-/skills/fhenix-sdk/                   # @FhenixProtocol/sdk-team
-
-# Migration skill (deferred to v1.5) — both teams involved.
-/skills/fhenix-migrate/               # @FhenixProtocol/sdk-team @FhenixProtocol/contracts-team
-
-# Review / audit skill — needs security + contracts eyes.
-/skills/fhenix-review/                # @FhenixProtocol/contracts-team @FhenixProtocol/security
-/agents/fhe-reviewer.md               # @FhenixProtocol/security
-
-# Tests skill — straddles SDK + contracts.
-/skills/fhenix-tests/                 # @FhenixProtocol/sdk-team @FhenixProtocol/contracts-team
-
-# Plugin manifests and infra — devrel owns.
-/.claude-plugin/                      # @FhenixProtocol/devrel
-/.github/                             # @FhenixProtocol/devrel
-/CHANGELOG.md                         # @FhenixProtocol/devrel
-/compatibility.json                   # @FhenixProtocol/devrel
-
-# Docs and spec — devrel owns by default; SDK/contracts review for content touching their surface.
-/docs/                                # @FhenixProtocol/devrel
-/README.md                            # @FhenixProtocol/devrel
-/LICENSE                              # @FhenixProtocol/devrel
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# @fhenixprotocol/protocol-team team will be requested for review when someone
+# opens a pull request.
+*       @fhenixprotocol/protocol-team @toml01
