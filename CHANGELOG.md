@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `skills/fhenix-tests/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and six concept files (foundry-mocks-setup, hardhat-plugin-setup, testing-encrypted-input, testing-decrypt-flows, testing-multi-permit, mock-vs-prod-divergence).
 - `skills/fhenix-review/` — SKILL.md, lookup-recipes, gotcha catalog (30+ items), security checklist, decision-trees, and four concept files (confidentiality-vs-anonymity, pattern-leakage, proof-of-plaintext-input, reveal-labels).
 - `agents/fhe-reviewer.md` — companion deep-audit subagent that loads the full catalog and produces structured prioritized reports.
+- `skills/fhenix-sdk/` — SKILL.md, lookup-recipes, hard-rules, decision-trees, and six concept files (init-singleton, encrypt-input, decrypt-view-vs-tx, permits, error-handling, hooks-pattern).
 
 ### Changed
 
