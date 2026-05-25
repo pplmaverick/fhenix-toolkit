@@ -82,7 +82,7 @@ Don't sit on broken content. The plugin is teaching Claude how to write producti
 
 ## Pre-1.0 caveats
 
-While we're in v0.x (private repo, pre-public-release):
+While we're in v0.x (pre-1.0):
 
 - Tag often — every meaningful change can get a tag, since there are no external consumers being disrupted.
 - Don't be precious about majors — a v0.x → v0.(x+1) major is cheap.

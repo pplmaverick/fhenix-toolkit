@@ -50,9 +50,9 @@ A future enhancement: smoke checks should `grep` for the target symbol in the fe
 
 `.github/CODEOWNERS` routes everything to `@fhenixprotocol/protocol-team` + `@toml01`. Per-area routing (contracts team for `/plugins/fhenix-toolkit/skills/fhenix-contracts/`, SDK team for `/plugins/fhenix-toolkit/skills/fhenix-sdk/`, etc.) was intentionally deferred — we wanted to mirror the simple cofhe pattern first. Revisit when the maintainer count grows.
 
-### Repo is private
+### No tagged release yet
 
-Until the repo is flipped public, only FhenixProtocol org members can `/plugin install` it. Public release is gated on merging the `fhenix-sdk` skill and tagging v1.0.
+The repo is public and installable, but no version has been tagged. `/plugin install fhenix-toolkit@FhenixProtocol` resolves to the default branch HEAD, so installs aren't reproducible — what you got today may differ from what someone else gets next week. v1.0 tagging is the next milestone; see [`docs/release-process.md`](release-process.md).
 
 ## Inherent limitations (not gaps — by design)
 

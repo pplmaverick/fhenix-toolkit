@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `assets/fhenix-logo.svg` — official Fhenix logo for README header.
+- `assets/fhenix-logo.svg` + `assets/fhenix-logo-dark.svg` — official Fhenix logo (light + dark variants). README uses a `<picture>` element with `prefers-color-scheme` so the dark variant renders on GitHub's dark theme.
 - `CLAUDE.md` at repo root — primer Claude reads when the plugin is loaded; documents activation map, layering, and hard rules.
 - `docs/architecture.md` — runtime model, skill anatomy, lookup-driven philosophy, file map.
 - `docs/known-flaws.md` — honest coverage-gap catalog grouped by skill + infra.
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Repo layout:** plugin moved to `plugins/fhenix-toolkit/` subdirectory (cc10x-style monorepo pattern). Marketplace `source` is now `git-subdir` pointing at the new path. Frees up the root for a future second plugin without restructuring.
 - CI workflows (`link-check.yml`, `lookup-recipe-smoke.yml`) — `paths:` filters and the smoke loop updated to match the new subdir layout.
+- Status updated from "early / private" to "public, pre-1.0" across README, SPEC, release-process, and known-flaws — the repo is now public.
 
 ### Added (original — pre-restructure)
 
